@@ -1,0 +1,389 @@
+{
+  "name": "Agente especialista en Gmail",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        272,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        352
+      ],
+      "id": "aea13de9-1f50-4009-a9ac-7f2f594f3829",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=# Rol\n\nEres un asistente de gestión de Correo Electrónico. \n\n# Especificaciones\n\nTodos los correos electrónicos deben tener un formato profesional en HTML y estar firmados como \"Fj Junquero\".\n\n# Herramientas\n\n- Usa \"enviar email\" para enviar correos electrónicos. Si no se indica ninguna dirección de correo, mándala siempre a: marru973@gmail.com\n- Usa \"crear borrador\" si el usuario pide un borrador.\n- Usa \"marcar como no leido\" para marcar un correo electrónico como no leído. Primero debes usar \"Get Emails\" para tener el ID del mensaje del correo electrónico que deseas marcar.\n- Usa \"etiquetar email\" para etiquetar un correo electrónico. Primero debes usar \"obtener etiqueta\" para tener el ID del mensaje del correo electrónico que deseas etiquetar. Luego debes usar \"Get Labels\" para tener el ID de la etiqueta.\n- Usa \"responder email\" para responder a un correo electrónico. Primero debes usar \"obtener email\" para tener el ID del mensaje del correo electrónico al que deseas responder.\n- Usa \"Borrar email\" para borrar los emails. Primero debes usar \"obtener email\" para  tener el ID del mensaje del correo electrónico que deseas borrar.\n\n# Notas\n\nFecha y hora actuales: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        560,
+        352
+      ],
+      "id": "b2f5fc76-ea07-4377-aa10-c0fb444b86dd",
+      "name": "Email Agent"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 180,
+        "width": 1120,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        288,
+        544
+      ],
+      "id": "6c5742e1-d608-4ebe-adf1-4528c24f29f3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ $fromAI(\"messageID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        592
+      ],
+      "id": "fb2c5c91-9c84-4222-9734-02de96be98e6",
+      "name": "marcar como no leido",
+      "webhookId": "a35af9d8-f67d-4ff9-803f-59ec6356e795",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        592
+      ],
+      "id": "6bff6a50-70c1-43c8-8d24-eb7874f626a1",
+      "name": "enviar email",
+      "webhookId": "86c8c4b1-13bb-4ebe-acb9-30e1d7082d55",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        592
+      ],
+      "id": "c5b2e455-6e26-40ca-a3e6-f835248f17c3",
+      "name": "responder email",
+      "webhookId": "114785e6-a859-432b-81b4-c490c1c35b1c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+        "labelIds": "={{ $fromAI(\"labelID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        752,
+        592
+      ],
+      "id": "a55792d5-01aa-4ba7-9bf8-39d3faebf7f0",
+      "name": "etiquetar email",
+      "webhookId": "0e951529-2e6d-40bf-ac40-fc0947e242e2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        592
+      ],
+      "id": "77b43dc9-2b7f-4136-8268-aa492965721b",
+      "name": "obtener etiquetas",
+      "webhookId": "9e08b59e-792d-4566-83f1-9263c9ad86ae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $fromAI(\"limit\",\"how many emails the user wants\") }}",
+        "simple": false,
+        "filters": {
+          "sender": "={{ $fromAI(\"sender\",\"who the emails are from\") }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        592
+      ],
+      "id": "12281c38-b24a-40f6-bb47-43c8eadebdfb",
+      "name": "obtener email",
+      "webhookId": "af4b3298-9037-44b0-aa12-2acbfbb5e66f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "html",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "threadId": "={{ $fromAI(\"threadID\") }}",
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1152,
+        592
+      ],
+      "id": "bca90c7d-ef16-4eed-8f27-3d3c643c983f",
+      "name": "crear borrador",
+      "webhookId": "17016bce-d7d7-428a-a56c-f6ea122db8be",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1280,
+        592
+      ],
+      "id": "f48c21f5-ba60-4e26-8cbe-128b05d484b0",
+      "name": "Borrar email",
+      "webhookId": "065e37bb-e889-4d1f-8a1c-e0de9393e4b8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marcar como no leido": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enviar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "responder email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "etiquetar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener etiquetas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear borrador": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Borrar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "aa26b13d-2fc6-4f7e-a9e8-4dc861b88550",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "8JBs7LTkUm7c01wj",
+  "tags": []
+}

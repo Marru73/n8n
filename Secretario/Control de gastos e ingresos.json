@@ -1,0 +1,408 @@
+{
+  "name": "Control de gastos e ingresos",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=datos a formatear: {{ $json.query }}"
+            },
+            {
+              "content": "=Debes formatear los datos que te paso y generar un JSON con las siguientes variables:\n{\n  \"Concepto\":\"ingreso o gasto\",\n  \"Descripción\":\"some_value\",\n  \"Valor\":\"some_value\",\n  \"Fecha\":\"{{ $now.format('dd-MM-yyyy') }}\"\n}\n\n* Siempre que te diga \"He comprado\", \"Me he gastado\" tómalo como gasto.\n\nEjemplos:\n\n\"Me he comprado una camiseta de 200€\"\n\"Me he gastado 200€ en una camiseta\"",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1168,
+        -48
+      ],
+      "id": "71d1e278-13f3-4acc-a9ca-5cf793ff4910",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.content.Concepto }}",
+                    "rightValue": "gasto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3a47a2ba-4ddf-4b10-bab2-edce1a5a4c09"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "gasto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b2d3ce41-b0a1-4f9c-bdb4-4e2c358800c2",
+                    "leftValue": "={{ $json.message.content.Concepto }}",
+                    "rightValue": "ingreso",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -800,
+        -48
+      ],
+      "id": "f635230a-379d-4e41-8697-49b56d238361",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U",
+          "mode": "list",
+          "cachedResultName": "Hoja de ingresos y gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1729548884,
+          "mode": "list",
+          "cachedResultName": "Gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit#gid=1729548884"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Descripción": "={{ $json.message.content['Descripción'] }}",
+            "Valor": "={{ $('Message a model').item.json.message.content.Valor }}",
+            "Fecha": "={{ $('Message a model').item.json.message.content.Fecha }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -576,
+        -144
+      ],
+      "id": "c509820a-05c8-4577-a196-444f6a52b3e4",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6549219d-2dbd-4dff-9e10-9a0ab5a0cf11",
+              "name": "response",
+              "value": "Se ha registrado con éxtito tu gasto.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        -144
+      ],
+      "id": "be61001f-8647-4569-a513-8b564a93c1e6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U",
+          "mode": "list",
+          "cachedResultName": "Hoja de ingresos y gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Ingresos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Descripción": "={{ $json.message.content['Descripción'] }}",
+            "Valor": "={{ $('Message a model').item.json.message.content.Valor }}",
+            "Fecha": "={{ $('Message a model').item.json.message.content.Fecha }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -576,
+        80
+      ],
+      "id": "69bf54b1-32ac-448f-9396-a19fcd31211b",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6549219d-2dbd-4dff-9e10-9a0ab5a0cf11",
+              "name": "response",
+              "value": "Se ha registrado con éxtito tu ingreso.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        80
+      ],
+      "id": "22c6a714-27a2-4d36-ab8f-2d19582d758b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1376,
+        -48
+      ],
+      "id": "9c6ad268-b3cf-459b-93e0-1e64b809c2dc",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "aeb504c4-da83-4a40-9fd4-a1b8bd100a28",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "4OIMsNQ4qNSkJQ9x",
+  "tags": []
+}

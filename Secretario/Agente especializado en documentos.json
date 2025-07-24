@@ -1,0 +1,199 @@
+{
+  "name": "Agente especializado en documentos",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        272,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=Eres un agente experto en el manejo de documentos y tu función aquí es muy sencilla: \nresponder a las peticiones del usuario utilizando las herramientas a tu alcance.\n\nPuedes:\n- Crear un documento\n- Guardar un documento\n- Actualizar documentos\n- Obtener documentos\n\n⚠️ No redactes el contenido tú mismo: solo realiza acciones sobre documentos.\n\nAntes de ejecutar una acción, asegúrate de tener:\n- Título del documento (si vas a crearlo)\n- URL o ID (si vas a obtener o actualizar)\n\nSi falta algún dato, solicita confirmación antes de continuar.\n\n📌 Todas las respuestas deben estar en **español**, incluso si algún contenido viene en otro idioma.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        480,
+        352
+      ],
+      "id": "0cd36a62-a484-4c64-8110-27f3f1987fbd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        704,
+        560
+      ],
+      "id": "11913032-28ec-4d29-b71b-c4802cba9794",
+      "name": "Actualizar documento",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "o7Y2ZpTaoRyZ9FPd",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        848,
+        560
+      ],
+      "id": "c8d558f6-2f2c-4adc-86f2-4b6b72f78754",
+      "name": "Obtener documento",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "o7Y2ZpTaoRyZ9FPd",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": "=myDrive",
+        "folderId": "1RW6kzvqdd3euj1KwuCkt-dbbQnSVpKs7",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        560,
+        560
+      ],
+      "id": "2eb120d1-e332-468c-8385-b8fe00324566",
+      "name": "Crear Documento",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "o7Y2ZpTaoRyZ9FPd",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        560
+      ],
+      "id": "cf27c5ea-ade0-4b7b-a450-dc9853621aca",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7d774802-dffa-4bf6-a6ca-65771e69fe20",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "ZOU4pLBxnXyRcLfi",
+  "tags": []
+}
