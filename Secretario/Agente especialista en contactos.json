@@ -1,0 +1,221 @@
+{
+  "name": "Agente especialista en contactos",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "be6ddaf5-5bb6-4f0a-941b-859eb7678773",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        224
+      ],
+      "id": "b5d58f5c-0fbc-4509-a214-aeba2e6e4d67",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=Eres un asistente especializado en la gestión de contactos.\n\nPuedes:\n- Buscar contactos\n- Crear contactos nuevos\n- Actualizar información de un contacto existente\n\n⚠️ No inventes información.\nValida que tengas al menos:\n- Nombre o apellido\n- Correo electrónico (si vas a crear o actualizar)\n\nSi algo falta, solicita al usuario la información necesaria.\n\n📌 Toda la comunicación debe ser en **español**.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "53cfd555-da8d-4d8b-b568-4dc43850635e",
+      "name": "Agente de contactos"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "fields": [
+          "emailAddresses",
+          "names",
+          "phoneNumbers"
+        ],
+        "useQuery": true,
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        464,
+        224
+      ],
+      "id": "6a64714e-b59c-4933-9eac-31700c4626a1",
+      "name": "Search",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+        "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+        "additionalFields": {
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "home",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        592,
+        224
+      ],
+      "id": "87b47420-99ae-4889-9d5b-98e5d89d8133",
+      "name": "Create",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "contactId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Contact_ID', ``, 'string') }}",
+        "fields": [
+          "emailAddresses",
+          "names"
+        ],
+        "updateFields": {
+          "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+          "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "home",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        720,
+        224
+      ],
+      "id": "6905ea34-01d9-42b3-b231-93e7b3e9b0f5",
+      "name": "Update",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bde19648-ab92-443f-a634-a785eb051b88",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "FZlXY7DiYiO0K0F3",
+  "tags": []
+}
