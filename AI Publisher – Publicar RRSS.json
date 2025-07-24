@@ -1,0 +1,1000 @@
+{
+  "name": "AI Publisher – Publicar RRSS",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        0
+      ],
+      "id": "6aec3f36-e498-4ab7-afbe-cb9185222f22",
+      "name": "Telegram Trigger",
+      "webhookId": "29a24a13-068b-4855-b99d-11b6599ada4b",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQhR4B8oD5zvhb0i",
+          "name": "Telegram Publicar RRSS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c52b6a6b-b506-4320-aa79-294dabc01373",
+              "leftValue": "={{ $json.callback_query.message.reply_markup.inline_keyboard[0][0].callback_data }}",
+              "rightValue": "elegir",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "14b36525-8b8e-4a5c-9856-d47e3332d076",
+      "name": "Si se pulsa el boton elegir"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU",
+          "mode": "list",
+          "cachedResultName": "ai_social_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051985695,
+          "mode": "list",
+          "cachedResultName": "Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit#gid=1051985695"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "choose",
+            "messageId": "={{ $json.messageId }}"
+          },
+          "matchingColumns": [
+            "messageId"
+          ],
+          "schema": [
+            {
+              "id": "messageId",
+              "displayName": "messageId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "6b6c7ac8-e0c5-4b1c-9ec0-77c6a32a126e",
+      "name": "Mark Chosen",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "“Busca la fila por messageId y actualiza status a ‘chosen’”\n\n"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU",
+          "mode": "list",
+          "cachedResultName": "ai_social_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051985695,
+          "mode": "list",
+          "cachedResultName": "Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit#gid=1051985695"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "24b7bf99-57c2-42a6-aef7-22fcc540f0b7",
+      "name": "Get all pendings",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=Crea una ilustración sencilla que represente el siguiente contenido: {{ $('Prompt para imagen').item.json.message.content }}\n",
+        "options": {
+          "dalleQuality": "hd",
+          "size": "1024x1024",
+          "returnImageUrls": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1984,
+        -16
+      ],
+      "id": "61c14f69-7ada-4e94-9ce0-a068cac60ae7",
+      "name": "Generate an image",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $now }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -16
+      ],
+      "id": "ea5d565a-dd96-48d5-b26e-afe9f7ed05a6",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/684331168104466/photos",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Generate an image').item.json.url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('Separar nombre y texto').item.json.texto }}  {{ $('Link real').item.json.link_real }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1232,
+        336
+      ],
+      "id": "95accc38-9386-4258-b173-4be5fe61d87e",
+      "name": "Publicar en Facebook",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "CUWacDPcod3K24zA",
+          "name": "Facebook Token Largo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "23434923-5bdd-4d36-9944-1f5024e75e6e",
+              "name": "nombre",
+              "value": "={{ $json.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "9f161793-57ad-4e57-9a07-5e3983285c9a",
+              "name": "texto",
+              "value": "={{ $json.texto }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        -16
+      ],
+      "id": "75b8da4e-c193-46f3-97cd-2cd98062bf80",
+      "name": "Separar nombre y texto"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=A partir del siguiente contenido, genera dos elementos:\n\n1. Un título atractivo y breve para redes sociales (máximo 8–10 palabras)\n2. Un post de Facebook en tono cercano, con un emoji al inicio y una pregunta o llamado a la acción al final.\n\nDevuélvelo en este formato exacto:\n\nTítulo: [aquí el título]  \nTexto: [aquí el post completo]\n\nContenido original: {{ $('Telegram Trigger').item.json.callback_query.message.text }}"
+            },
+            {
+              "content": "=Eres un redactor especializado en redes sociales. Escribes posts para Facebook con un estilo claro, directo y humano. Siempre comienzas con un emoji llamativo y terminas con una pregunta o llamado a la acción. Los textos deben ser breves, atractivos y fáciles de leer.\n",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 700,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        784,
+        -16
+      ],
+      "id": "37fd59e8-dc66-49a1-8e11-69d3b7bde84a",
+      "name": "Generar texto Post",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4",
+          "mode": "list",
+          "cachedResultName": "GPT-4"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=System Layer\n🧾 Role\nEres un agente generador de imágenes usando DALL·E 3, especializado en traducir textos emocionales o conceptuales en ilustraciones visuales impactantes. Tu propósito es transformar el mensaje del texto en una imagen poderosa, metafórica o simbólica, perfecta para redes sociales.\n\n🎯 Purpose\nCrear una única imagen por ejecución que transmita visualmente el núcleo emocional y conceptual del texto de entrada. Esta imagen debe ser capaz de detener el scroll en redes sociales como Instagram, X o LinkedIn, capturando atención inmediata y reforzando el mensaje del post original.\n\nInput Layer\nCampo principal: {{ $json.texto }}\nEste campo contiene el texto de entrada, generalmente emocional, provocador, inspirador o reflexivo.\n\nEl contenido puede estar en español o inglés.\n\nDebes interpretar el tono, sentimiento y mensaje principal del texto.\n\nAction Layer\n🛠️ Instrucciones\nAnaliza el texto cuidadosamente.\n\nIdentifica el mensaje principal: ¿Qué está tratando de comunicar emocional o filosóficamente?\n\nDetecta el tono: inspirador, sombrío, provocador, esperanzador, introspectivo…\n\nRedacta un prompt visual altamente descriptivo para DALL·E 3.\n\nDescribe una escena visual impactante y conceptual.\n\nUsa elementos simbólicos en lugar de representaciones literales del texto.\n\nEscoge entre estilos como fotorrealismo, ilustración digital detallada, o surrealismo según el tono del texto.\n\nIncluye detalles sobre la composición, ambiente, iluminación, perspectiva y estilo artístico.\n\nEvita incluir texto en la imagen.\n\nNo menciones palabras, letras, frases ni señalética en el prompt.\n\nOptimiza la imagen para ser compartida en RRSS.\n\nUsa una estética clara, centrada, y visualmente poderosa desde lejos.\n\nEvita fondos o composiciones sobrecargadas.\n\nDevuelve solo el prompt listo para enviar a DALL·E 3.\n\nEXAMPLES:\n\nImput:\n{{ $json.texto }} = \"No estás estancado. Estás incubando algo grande.\"\n\nOutput (prompt para DALL·E 3):\nA giant translucent egg glowing warmly in a dark cave, with hints of a majestic creature forming inside. Soft ambient lighting illuminates the egg while the surroundings remain shadowy. Style: high-detail digital illustration. Mood: hope, anticipation, mystery. No text.\n\nImput:\n{{ $json.texto }} = \"A veces lo más valiente que puedes hacer… es rendirte.\"\n\nOutput (prompt para DALL·E 3):\nA lone figure standing at the edge of a cliff at dawn, slowly lowering a white flag into the wind. The sky is dramatic with heavy clouds and a golden light piercing through. The scene feels calm yet emotional. Style: cinematic, soft lighting, hyperrealistic. No text.\n\nFinal Notes:\n\nSi el texto contiene temas sensibles, como violencia, representa solo de forma artística y simbólica.\n\nNo generes imágenes con contenido textual, marcas, ni lenguaje gráfico.\n\n\n\n\n\n\n\n",
+              "role": "system"
+            },
+            {
+              "content": "={{ $json.texto }}\n"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 700,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1616,
+        -16
+      ],
+      "id": "e5cb95a1-a0f1-4028-b017-19f4dd29e85f",
+      "name": "Prompt para imagen",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/17841438201332308/media_publish",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        336
+      ],
+      "id": "bd7da8fb-2acd-4be5-9965-879ca273d68b",
+      "name": "Publicar en Instagram",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ND8jPcNAk0hgN190",
+          "name": "Header Auth account"
+        },
+        "facebookGraphApi": {
+          "id": "XarWEdZI4qcEoOqB",
+          "name": "Instagram Token Largo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "234e1233-7345-80c1-8664-ff1b9e35c550",
+          "mode": "list",
+          "cachedResultName": "Publicaciones IA",
+          "cachedResultUrl": "https://www.notion.so/234e1233734580c18664ff1b9e35c550"
+        },
+        "title": "Publicaciones IA",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "🏷️ Nombre|title",
+              "title": "={{ $('Separar nombre y texto').item.json.nombre }}\n"
+            },
+            {
+              "key": "🖼️ Imagen IA|url",
+              "ignoreIfEmpty": true,
+              "urlValue": "={{ $('Generate an image').item.json.url }}"
+            },
+            {
+              "key": "🔗 Enlace original|url",
+              "ignoreIfEmpty": true,
+              "urlValue": "={{ $('Generate an image').item.json.url }}"
+            },
+            {
+              "key": "✅ Publicado|checkbox"
+            },
+            {
+              "key": "🗓️ Fecha|date",
+              "date": "={{ $json.toISO }}"
+            },
+            {
+              "key": "Texto|rich_text",
+              "richText": true,
+              "text": {
+                "text": [
+                  {
+                    "text": "={{ $('Separar nombre y texto').item.json.texto }}",
+                    "annotationUi": {}
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        336
+      ],
+      "id": "5f9ae910-bdcd-4308-a6e7-f177a7506f01",
+      "name": "Registrar en Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "Z8n025g6X7hp8WsA",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $node[\"Registrar en Notion\"].json.id }}\n",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "✅ Publicado|checkbox",
+              "checkboxValue": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        336
+      ],
+      "id": "3d564460-f27d-46b7-be83-130036adc7ef",
+      "name": "Marcar como publicado",
+      "credentials": {
+        "notionApi": {
+          "id": "Z8n025g6X7hp8WsA",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a5cf883-de16-43d0-8bfd-26a28b637021",
+              "name": "link_real",
+              "value": "={{ $('Telegram Trigger').item.json.callback_query.message.entities[1].url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        -16
+      ],
+      "id": "a0dfb129-6eda-4a68-ab87-9d0a020d7862",
+      "name": "Link real"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $json.message?.content || \"\";\n\nlet titulo = \"Sin título\";\nlet texto = \"Sin texto\";\n\nconst tituloMatch = content.match(/Título:\\s*(.*?)(?=\\n|Texto:)/s);\nif (tituloMatch) {\n  titulo = tituloMatch[1].trim();\n}\n\nconst textoMatch = content.match(/Texto:\\s*([\\s\\S]*)/);\nif (textoMatch) {\n  texto = textoMatch[1].trim();\n}\n\nreturn [\n  {\n    json: {\n      nombre: titulo,\n      texto: texto\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -16
+      ],
+      "id": "a9fd240c-c37c-4625-ac03-2f274ddbc98d",
+      "name": "Obtener el nombre y el texto"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU",
+          "mode": "list",
+          "cachedResultName": "ai_social_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "timestamp": "=$now.toISO()",
+            "workflow": "=$workflow.name",
+            "posted_items": "=$items(\"Publicar en Facebook\").length",
+            "fb_post_id": "=$json[\"Publicar en Facebook\"].id ?? \"—\""
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_items\t",
+              "displayName": "total_items\t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "posted_items",
+              "displayName": "posted_items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ig_media_id ",
+              "displayName": "ig_media_id ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1696,
+        336
+      ],
+      "id": "9f34e630-c41b-4ffa-93d0-4a39e4ff8f68",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9041b5b1-ef45-4034-8057-0e367efcbb78",
+              "name": "timestamp",
+              "value": "={{ $now.format('dd-MM-yyyy HH:mm') }}",
+              "type": "string"
+            },
+            {
+              "id": "c4884ef3-9953-45b2-bb04-e7ccf873d5dc",
+              "name": "workflow",
+              "value": "={{$workflow.name}}",
+              "type": "string"
+            },
+            {
+              "id": "26c0356e-2294-437c-b3d3-dca4b08ab5ec",
+              "name": "posted_items",
+              "value": "={{$items(\"Publicar en Facebook\").length}}",
+              "type": "string"
+            },
+            {
+              "id": "bd1be928-fc6f-43e0-98be-eef952b9e638",
+              "name": "fb_post_id",
+              "value": "={{ $json.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "5427322c-1ac8-41d2-84ed-897a964df77d",
+              "name": "ig_media_id ",
+              "value": "={{ $('Crear Media').item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        336
+      ],
+      "id": "f798cbd5-1041-49a2-aba1-870fe04b8714",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/17841438201332308/media",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "image_url",
+              "value": "={{ $('Generate an image').item.json.url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('Separar nombre y texto').item.json.texto }}  {{ $('Link real').item.json.link_real }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        336
+      ],
+      "id": "af336def-3da2-406d-b417-a15bb654baf2",
+      "name": "Crear Media",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "XarWEdZI4qcEoOqB",
+          "name": "Instagram Token Largo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1701586527",
+        "text": "Tu post se publicó en RRSS sastifactoriamente 👍😎😜",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2160,
+        336
+      ],
+      "id": "4dab8702-3f5b-4e45-8119-d2651b1e2a8c",
+      "name": "Send a text message",
+      "webhookId": "7f3d3602-9277-4514-b4c9-0a56b3ce56b0",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQhR4B8oD5zvhb0i",
+          "name": "Telegram Publicar RRSS"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Si se pulsa el boton elegir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Si se pulsa el boton elegir": {
+      "main": [
+        [
+          {
+            "node": "Get all pendings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Chosen": {
+      "main": [
+        [
+          {
+            "node": "Link real",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all pendings": {
+      "main": [
+        [
+          {
+            "node": "Mark Chosen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Registrar en Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar en Facebook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar nombre y texto": {
+      "main": [
+        [
+          {
+            "node": "Prompt para imagen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar texto Post": {
+      "main": [
+        [
+          {
+            "node": "Obtener el nombre y el texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt para imagen": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar en Instagram": {
+      "main": [
+        [
+          {
+            "node": "Publicar en Facebook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar en Notion": {
+      "main": [
+        [
+          {
+            "node": "Crear Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar como publicado": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link real": {
+      "main": [
+        [
+          {
+            "node": "Generar texto Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener el nombre y el texto": {
+      "main": [
+        [
+          {
+            "node": "Separar nombre y texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Marcar como publicado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Media": {
+      "main": [
+        [
+          {
+            "node": "Publicar en Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "kmlRLJ01WgqKQOXq"
+  },
+  "versionId": "4689f839-34b5-4ca1-a310-b46056bd14f2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "ckgx2S4TM17TojEh",
+  "tags": [
+    {
+      "createdAt": "2025-07-13T18:02:49.662Z",
+      "updatedAt": "2025-07-13T18:02:49.662Z",
+      "id": "9pjpmjCjld0jhKg3",
+      "name": "Fran Junquero"
+    },
+    {
+      "createdAt": "2025-07-14T09:29:54.016Z",
+      "updatedAt": "2025-07-14T09:29:54.016Z",
+      "id": "hfGesm7WglBONLwl",
+      "name": "😎"
+    }
+  ]
+}

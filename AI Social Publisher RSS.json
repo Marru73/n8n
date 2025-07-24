@@ -1,0 +1,684 @@
+{
+  "name": "AI Social Publisher RSS",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            },
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1088,
+        192
+      ],
+      "id": "d9393c7a-569e-442f-b4d6-01f4fec9f25f",
+      "name": "Disparador diario"
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=inteligencia+artificial&hl=es&gl=ES&ceid=ES:es",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -704,
+        96
+      ],
+      "id": "7a26988b-cf16-42ee-a027-c54dc386cc25",
+      "name": "Leer noticias Google IA"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        608,
+        144
+      ],
+      "id": "4d0eb701-cd68-4d05-8b18-0d773a0ba51f",
+      "name": "Limitar a 10 noticias"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "234e1233-7345-80c1-8664-ff1b9e35c550",
+          "mode": "list",
+          "cachedResultName": "Publicaciones IA",
+          "cachedResultUrl": "https://www.notion.so/234e1233734580c18664ff1b9e35c550"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -704,
+        272
+      ],
+      "id": "d67a9f00-6b2d-4a87-8c74-2d7fcc6add36",
+      "name": "Noticias ya publicadas",
+      "credentials": {
+        "notionApi": {
+          "id": "Z8n025g6X7hp8WsA",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -320,
+        176
+      ],
+      "id": "ef2ba795-bb8b-42fd-aab2-20bff13599fc",
+      "name": "Combinar RSS + Notion (para filtro)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const noticias = $input.all(0); // RSS\nconst publicadas = $input.all(1); // Notion\n\nfunction limpiarTexto(texto) {\n  return texto\n    .toLowerCase()\n    .normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n    .replace(/[^\\w\\s]/g, \"\")\n    .replace(/\\b(la|el|de|a|en|y|para|por|con|que|los|las|del|al|un|una|lo|es|esta|está|hay|muy|más|menos|como|pero|porque|esto|eso|ya|su|te|tu|mi)\\b/g, '')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\nfunction similitud(t1, t2) {\n  const palabras1 = new Set(limpiarTexto(t1).split(/\\s+/));\n  const palabras2 = new Set(limpiarTexto(t2).split(/\\s+/));\n  const comunes = [...palabras1].filter(p => palabras2.has(p));\n  return comunes.length / Math.max(palabras1.size, palabras2.size);\n}\n\nfunction hashSimplificado(texto) {\n  return limpiarTexto(texto).split(' ').sort().join(' ');\n}\n\nconst titulosPublicados = publicadas.map(p => p.json[\"property_nombre\"] || '');\nconst enlacesPublicados = publicadas.map(p => p.json[\"property_enlace_original\"] || '');\nconst hashesPublicados = titulosPublicados.map(t => hashSimplificado(t));\n\nconst umbral = 0.6;\n\n// Devolver solo las noticias que no sean duplicadas\nreturn noticias.filter(noticia => {\n  const titulo = noticia.json.title || '';\n  const enlace = noticia.json.link;\n\n  if (enlacesPublicados.includes(enlace)) return false;\n\n  const hashActual = hashSimplificado(titulo);\n\n  for (let i = 0; i < titulosPublicados.length; i++) {\n    const sim = similitud(titulo, titulosPublicados[i]);\n    const hashIgual = hashActual === hashesPublicados[i];\n\n    if (sim > umbral || hashIgual) {\n      return false;\n    }\n  }\n\n  return true;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        176
+      ],
+      "id": "b98624da-cc8a-4004-a23a-e618e4381fa6",
+      "name": "Filtrar noticias nuevas",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dbc15a4b-c4f4-4f7d-96a5-459de1568772",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "inteligencia artificial",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0b55e655-3f4f-4f0c-ade8-809add5acf7b",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "IA",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "52c5cc80-9599-4523-9b4c-dd81b69d65bd",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "machine learning",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "f2b53475-3246-41bf-b13e-1f53377641c1",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "n8n",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "265bdbd9-a430-4ade-bf3b-6576167d1c6f",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "automatización",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "9c175395-9cc9-4fdc-ab5a-ef69d98a0ded",
+              "leftValue": "={{ $json.contentSnippet }}",
+              "rightValue": "inteligencia artificial",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "fa680715-f085-4cc6-8ac9-6041d1587056",
+              "leftValue": "={{ $json.contentSnippet }}",
+              "rightValue": "IA",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "e40b4f30-372c-4719-a1ae-a984bdfcda1e",
+              "leftValue": "={{ $json.contentSnippet }}",
+              "rightValue": "machine learning",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "3a815183-c1b7-44b8-bfca-2fd3c51bc194",
+              "leftValue": "={{ $json.contentSnippet }}",
+              "rightValue": "n8n",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "fd77b7e2-f531-44f6-8d4c-cd7cf950eead",
+              "leftValue": "={{ $json.contentSnippet }}",
+              "rightValue": "automatización",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        160
+      ],
+      "id": "31264ce9-0401-447d-b4db-116f0f0b6969",
+      "name": "Filtrar por IA / n8n / automatización"
+    },
+    {
+      "parameters": {
+        "chatId": "1701586527",
+        "text": "=📰 *{{ $json[\"title\"] }}*\n\n{{ $json[\"contentSnippet\"] }}\n\n🔗 [Leer artículo]({{ $json[\"link\"] }})\n\n¿Qué quieres hacer con esta noticia?\n",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📌 Elegir esta noticia",
+                    "additionalFields": {
+                      "callback_data": "elegir"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        128
+      ],
+      "id": "d4eafe0d-c09f-4494-860b-4096121b8d34",
+      "name": "Enviar noticias a Telegram",
+      "webhookId": "0c65e8d4-5e70-4d9d-a384-3970a8f8fa0b",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQhR4B8oD5zvhb0i",
+          "name": "Telegram Publicar RRSS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1701586527",
+        "text": "🤖 Colega, hoy no hay noticias nuevas sobre inteligencia artificial. ¡Nos vemos mañana!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        384
+      ],
+      "id": "50302661-fe8c-43cb-a720-be82be852e2d",
+      "name": "Informar no hay noticias",
+      "webhookId": "a2470af0-722e-475e-8b6c-97186afc0508",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1b431fa4-f6a3-43b5-8e8b-cb757a1e9f97",
+              "leftValue": "={{ $items.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        176
+      ],
+      "id": "e7859b7a-6713-42b5-ade1-3f8c917ee0ae",
+      "name": "Comprobar si hay noticias"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1b431fa4-f6a3-43b5-8e8b-cb757a1e9f97",
+              "leftValue": "={{ $items.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        144
+      ],
+      "id": "dbf1acc1-6043-43b1-806f-12234fad1c79",
+      "name": "Comprobar si hay noticias después del filtro"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eb08ec06-f30d-44ae-bff2-320cb704d58e",
+              "name": "messageId",
+              "value": "={{ $json.result.message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "0b7bf3d3-fe69-4097-92bb-5de253c2213f",
+              "name": "chatId",
+              "value": "={{ $json.result.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "b8f5b7cb-9282-44c6-ba28-bd2df1145bca",
+              "name": "timestamp",
+              "value": "={{ $now.format('dd-MM-yyyy HH:mm') }}",
+              "type": "string"
+            },
+            {
+              "id": "81afd672-4641-4fb7-86de-04972a0fb105",
+              "name": "status",
+              "value": "pending",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        128
+      ],
+      "id": "2a2af31f-b8bb-4e2b-b24f-4c5f31c58f49",
+      "name": "Registro timeout",
+      "executeOnce": true,
+      "notes": "Prepara datos de timeout para guardar en Google Sheets (pestaña timeouts)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU",
+          "mode": "list",
+          "cachedResultName": "ai_social_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051985695,
+          "mode": "list",
+          "cachedResultName": "Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit#gid=1051985695"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "messageId",
+              "displayName": "messageId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1632,
+        128
+      ],
+      "id": "ac04b264-77b2-47c0-afe6-c6367fbcdbcf",
+      "name": "Status pending",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "qzVJtBfL3J6eLthJ",
+          "mode": "list",
+          "cachedResultName": "Ai Publisher No pulsado elegir"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        128
+      ],
+      "id": "ed1f8dfe-1473-4fba-b2e0-1e6a68054435",
+      "name": "Execute Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Disparador diario": {
+      "main": [
+        [
+          {
+            "node": "Leer noticias Google IA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Noticias ya publicadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer noticias Google IA": {
+      "main": [
+        [
+          {
+            "node": "Combinar RSS + Notion (para filtro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limitar a 10 noticias": {
+      "main": [
+        [
+          {
+            "node": "Comprobar si hay noticias después del filtro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Noticias ya publicadas": {
+      "main": [
+        [
+          {
+            "node": "Combinar RSS + Notion (para filtro)",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combinar RSS + Notion (para filtro)": {
+      "main": [
+        [
+          {
+            "node": "Filtrar noticias nuevas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar noticias nuevas": {
+      "main": [
+        [
+          {
+            "node": "Comprobar si hay noticias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar por IA / n8n / automatización": {
+      "main": [
+        [
+          {
+            "node": "Limitar a 10 noticias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comprobar si hay noticias": {
+      "main": [
+        [
+          {
+            "node": "Filtrar por IA / n8n / automatización",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Informar no hay noticias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comprobar si hay noticias después del filtro": {
+      "main": [
+        [
+          {
+            "node": "Enviar noticias a Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Informar no hay noticias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar noticias a Telegram": {
+      "main": [
+        [
+          {
+            "node": "Registro timeout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registro timeout": {
+      "main": [
+        [
+          {
+            "node": "Status pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status pending": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "kmlRLJ01WgqKQOXq"
+  },
+  "versionId": "ae470aa4-f768-43c9-8476-2fe94775bb3a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "m9C0OgiMv3NpO3Ij",
+  "tags": [
+    {
+      "createdAt": "2025-07-13T18:02:49.662Z",
+      "updatedAt": "2025-07-13T18:02:49.662Z",
+      "id": "9pjpmjCjld0jhKg3",
+      "name": "Fran Junquero"
+    },
+    {
+      "createdAt": "2025-07-14T09:29:54.016Z",
+      "updatedAt": "2025-07-14T09:29:54.016Z",
+      "id": "hfGesm7WglBONLwl",
+      "name": "😎"
+    }
+  ]
+}

@@ -1,0 +1,357 @@
+{
+  "name": "Ai Publisher No pulsado elegir",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU",
+          "mode": "list",
+          "cachedResultName": "ai_social_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051985695,
+          "mode": "list",
+          "cachedResultName": "Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit#gid=1051985695"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -352,
+        -176
+      ],
+      "id": "c19e30e0-3e45-400e-b681-65f0d8b44910",
+      "name": "Get pending rows",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Recupera todas las filas con status ‘pending"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU",
+          "mode": "list",
+          "cachedResultName": "ai_social_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051985695,
+          "mode": "list",
+          "cachedResultName": "Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fyBplLyrCp2o-1jr7TakoRjkJy0aIRzYfzqEL0ytkUU/edit#gid=1051985695"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "messageId": "={{ $json.messageId }}",
+            "status": "timeout"
+          },
+          "matchingColumns": [
+            "messageId"
+          ],
+          "schema": [
+            {
+              "id": "messageId",
+              "displayName": "messageId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        144,
+        -192
+      ],
+      "id": "a402f83c-c21c-48ab-914f-1a3efc0a17ad",
+      "name": "Mark timeout",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Actualiza a ‘timeout’ los registros expirados"
+    },
+    {
+      "parameters": {
+        "chatId": "=1701586527",
+        "text": "⌛ Se acabó el plazo de 10 min para elegir. Workflow detenido.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -192
+      ],
+      "id": "55e42d65-9e1a-4552-b9e3-40cae084476a",
+      "name": "Notify timeout",
+      "webhookId": "fb9b0cf9-c2eb-4d81-9868-4ed89ce5cf74",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQhR4B8oD5zvhb0i",
+          "name": "Telegram Publicar RRSS"
+        }
+      },
+      "notes": "Notifica al usuario que ha expirado el tiempo"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Timeout de interacción: no se pulsó “elegir” en 10 min. Flujo finalizado."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -192
+      ],
+      "id": "62dbb4cd-8c2e-4ce4-a7bc-fcaee27d34fd",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cfb841d0-c343-4e3f-98ec-d52bf9316101",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "pending",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        -176
+      ],
+      "id": "ec2daec4-4ed0-4b11-9bbd-8e71efdc07fc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        -176
+      ],
+      "id": "0ad9c095-7713-4ef0-b067-9f1c566582a0",
+      "name": "Wait",
+      "webhookId": "a5feaf46-806a-4dc1-bede-674815afd39a"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "28146f98-a455-4676-9ad4-746bed32d885",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        -176
+      ],
+      "id": "753e4dc7-13ea-483e-a135-697930a6c6dd",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get pending rows": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark timeout": {
+      "main": [
+        [
+          {
+            "node": "Notify timeout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify timeout": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Mark timeout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get pending rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "12b0180b-5394-4efd-a3eb-befd489c29db",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "qzVJtBfL3J6eLthJ",
+  "tags": [
+    {
+      "createdAt": "2025-07-13T18:02:49.662Z",
+      "updatedAt": "2025-07-13T18:02:49.662Z",
+      "id": "9pjpmjCjld0jhKg3",
+      "name": "Fran Junquero"
+    },
+    {
+      "createdAt": "2025-07-14T09:29:54.016Z",
+      "updatedAt": "2025-07-14T09:29:54.016Z",
+      "id": "hfGesm7WglBONLwl",
+      "name": "😎"
+    }
+  ]
+}
