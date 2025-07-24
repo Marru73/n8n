@@ -2,30 +2,32 @@
 
 Este repositorio centraliza mis flujos de trabajo de n8n.
 
-## Workflows
+### AI PUBLISHER:
 
-### `AI Social Publisher RSS
+    ## Workflows
 
-- **Archivo**: `AI Social Publisher RSS.json`  
-- **Descripción**: Envía noticias a Telegram, registra la elección y gestiona timeouts.  
-- **Version**: v1.0  
-- **Última actualización**: 24/07/2025  
+    ### `AI Social Publisher RSS
 
-### AI Publisher – Publicar RRSS
-- **Archivo**: `AI Publisher – Publicar RRSS.json`  
-- **Descripción**: Sub‑workflow que procesa la pulsación de “elegir” y lanza publicación en RRSS.  
-- **Version**: v1.0  
+    - **Archivo**: `AI Social Publisher RSS.json`  
+    - **Descripción**: Envía noticias a Telegram, registra la elección y gestiona timeouts.  
+    - **Version**: v1.0  
+    - **Última actualización**: 24/07/2025  
 
-### AI Publisher – Ai Publisher No pulsado elegir.json
+    ### AI Publisher – Publicar RRSS
+    - **Archivo**: `AI Publisher – Publicar RRSS.json`  
+    - **Descripción**: Sub‑workflow que procesa la pulsación de “elegir” y lanza publicación en RRSS.  
+    - **Version**: v1.0  
 
-- **Archivo**: `Ai Publisher No pulsado elegir.json`  
-- **Descripción**: Sub‑workflow que gestiona expiración de 10 min y notifica timeouts.  
-- **Version**: v1.0  
+    ### AI Publisher – Ai Publisher No pulsado elegir.json
 
-## Uso
+    - **Archivo**: `Ai Publisher No pulsado elegir.json`  
+    - **Descripción**: Sub‑workflow que gestiona expiración de 10 min y notifica timeouts.  
+    - **Version**: v1.0  
 
-1. Importa cualquiera de los JSON en tu instancia de n8n (Workflows → Import).  
-2. Configura tus **Credentials** (Telegram, Google Sheets, APIs externas).  
-3. Activa los workflows y deja que corran según su trigger (Schedule o Webhook).
+    ## Uso
+
+    1. Importa cualquiera de los JSON en tu instancia de n8n (Workflows → Import).  
+    2. Configura tus **Credentials** (Telegram, Google Sheets, APIs externas).  
+    3. Activa los workflows y deja que corran según su trigger (Schedule o Webhook).
 
 
