@@ -57,10 +57,4 @@ Este repositorio centraliza mis flujos de trabajo de n8n.
   Agente que interactúa con Google Docs: crear documentos, obtenerlos o actualizarlos según instrucciones del usuario (sin redactar contenido).  
  
 - **Control de gastos e ingresos**  
-  Procesa texto libre con OpenAI para extraer concepto, descripción, valor y fecha, y registra automáticamente la fila en la hoja de Google Sheets correspondiente (Gastos o Ingresos).  
- 
-- **Flujo Principal Telegram**  
-  Orquestador principal que recibe mensajes de Telegram, detecta texto/voz/foto y llama al agente adecuado (Gmail, Calendario, Contactos, Documentos, Contabilidad, Writer, Calculadora o Búsqueda web).  
-
-
-
+  Procesa texto libre con OpenAI para extraer concepto, descripción, valor y fecha, y registra automáticamente la fila en la hoja de Google Sheets correspondiente (Gastos o Ingresos).

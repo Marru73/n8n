@@ -1,0 +1,694 @@
+{
+  "name": "Telegram Task",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "add",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "af1c0172-dd0e-4ba9-b042-ee4a81b2b1ce"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Add"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8948095a-cdc3-4a52-a2a4-d20710d1747b",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "List"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2321bbf1-85f8-4389-bb0f-7f3e1253d42e",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Delete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0de9b071-3017-49f2-bcfe-762e660f18ad",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Default"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        -336
+      ],
+      "id": "132e57c6-cabe-451e-9813-159d0a46c12e",
+      "name": "03_Switch_Command",
+      "notesInFlow": true,
+      "notes": "Rutea según {{$json.command}} (‘add’, ‘list’, ‘delete’, default)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw",
+          "mode": "list",
+          "cachedResultName": "Telegram_Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Telegram Trigger').item.json.message.message_id }}",
+            "TEXT": "={{ $json.payload }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TEXT",
+              "displayName": "TEXT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        480,
+        -592
+      ],
+      "id": "088e610b-9622-4cd3-b348-f0cf02012ff1",
+      "name": "04_GS_AppendTask",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Añade una fila en Sheets con id y texto de la tarea."
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Tarea añadida ✅ • ID: {{ $json.ID }} • Texto: {{ $json.TEXT }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        -576
+      ],
+      "id": "eccc5bf6-f0f6-41bb-a387-e8b5b2b8f833",
+      "name": "05_TG_SendAddConfirm",
+      "webhookId": "a312b112-13c2-4231-835d-2bee0c1f28d4",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Informa al usuario de Telegram que la tarea se ha añadido."
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw",
+          "mode": "list",
+          "cachedResultName": "Telegram_Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        480,
+        -384
+      ],
+      "id": "d9417d4a-d3bd-4885-871f-a74f23bb2c1c",
+      "name": "06_GS_ReadTasks",
+      "notesInFlow": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Lee todas las filas de Tasks!A:B para listar tareas."
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Id: {{ $json.ID }} - Texto: {{ $json.TEXT }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        -384
+      ],
+      "id": "6fd21913-1cce-4244-a822-8d6bba2251b0",
+      "name": "08_FormatTasksList1",
+      "webhookId": "7d913a3a-1ea6-4ab8-9a71-feae54f5f914",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Envía al usuario el listado de tareas formateado."
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw",
+          "mode": "list",
+          "cachedResultName": "Telegram_Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit#gid=0"
+        },
+        "startIndex": "={{ $('09 Cargar filas').item.json.row_number }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1344,
+        -256
+      ],
+      "id": "cd9e5103-895c-4826-b039-be19ceee50a9",
+      "name": "12_GS_DeleteByRowNumber",
+      "notesInFlow": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Borra la fila de Tasks con el id indicado en payload"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.ChatId }}",
+        "text": "=❌ No existe tarea con id {{ $json.payload }}. Usa /list para ver tus tareas.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        -48
+      ],
+      "id": "92571af2-9dd8-4e58-88e7-0f666b56b524",
+      "name": "14_TG_SendDeleteError",
+      "webhookId": "16f1e49e-2aed-480e-896e-c34f3b2c6cf5",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Notifica que no existe la tarea para borrar"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "=Tarea con Id: {{ $('09 Cargar filas').item.json.ID }} eliminada ✅",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        -256
+      ],
+      "id": "42c2de3a-ba7a-49ec-bec9-0b63562205ce",
+      "name": "13_TG_SendDeleteConfirm",
+      "webhookId": "b68baa5f-2ae2-4e03-910c-ae405ba0d1e3",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Confirma al usuario que la tarea se borró"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7d5410b5-3cb6-4bfd-a730-0a4104e6aa5d",
+              "leftValue": "={{ $json.payload }}",
+              "rightValue": "={{ $('09 Cargar filas').item.json.ID }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -176
+      ],
+      "id": "c47c503a-bf1d-4628-b53d-ff869d1bdd4e",
+      "name": "11_IF_RowFound"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3232b7b9-8d59-41ee-948d-e1a79fa13f24",
+              "name": "command",
+              "value": "={{$json.message.text.split(' ')[0].slice(1)}}",
+              "type": "string"
+            },
+            {
+              "id": "ee6f7015-ed80-4289-b5dc-a1eb10ceae3c",
+              "name": "payload",
+              "value": "={{$json.message.text.split(' ').slice(1).join(' ')}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        -304
+      ],
+      "id": "36582a57-89c9-4d7b-919c-5194885428e0",
+      "name": "02_Parse_Command",
+      "notesInFlow": true,
+      "notes": "Extrae comando y payload de {{$json.message.text}}"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        -304
+      ],
+      "id": "04277a9c-d153-4d3e-9a32-d1f0f37355a7",
+      "name": "Telegram Trigger",
+      "webhookId": "632a9602-8d20-40bb-9a1d-ace535c889b2",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw",
+          "mode": "list",
+          "cachedResultName": "Telegram_Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Task",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZVdwLmHZUbPFAzMgzjx4h_KomQvkqmZimgvJcqjh8Mw/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "ID",
+              "lookupValue": "={{ $json.payload }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        480,
+        -176
+      ],
+      "id": "c88aa203-c0e3-428e-870b-9d0bd05e40f7",
+      "name": "09 Cargar filas",
+      "notesInFlow": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Cargar filas del sheet"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee6f7015-ed80-4289-b5dc-a1eb10ceae3c",
+              "name": "payload",
+              "value": "={{ $('02_Parse_Command').item.json.payload }}",
+              "type": "number"
+            },
+            {
+              "id": "1dc5bcba-49af-4ed2-8aae-d92e49d5516e",
+              "name": "ChatId",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        -176
+      ],
+      "id": "7d9a7640-d471-4ce0-820b-5a468188aab0",
+      "name": "10 Converetir a número",
+      "notesInFlow": true,
+      "notes": "Convierte payload a número para compararlo con el Id del sheet"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "❌ Comando no válido.   Usa: /add <texto> – para añadir una tarea, /list – para listar tareas, o /delete <id> – para borrar una tarea",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        48
+      ],
+      "id": "874ec1e7-97e9-45f7-85ef-9345e9066d64",
+      "name": "07 Error en Comandos",
+      "webhookId": "8c70aaf9-c7d9-4263-bb18-f4caa08b3bab",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Manda un error cuando no se ha introducido bien el comando."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "03_Switch_Command": {
+      "main": [
+        [
+          {
+            "node": "04_GS_AppendTask",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "06_GS_ReadTasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "09 Cargar filas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "07 Error en Comandos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04_GS_AppendTask": {
+      "main": [
+        [
+          {
+            "node": "05_TG_SendAddConfirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06_GS_ReadTasks": {
+      "main": [
+        [
+          {
+            "node": "08_FormatTasksList1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "12_GS_DeleteByRowNumber": {
+      "main": [
+        [
+          {
+            "node": "13_TG_SendDeleteConfirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "11_IF_RowFound": {
+      "main": [
+        [
+          {
+            "node": "12_GS_DeleteByRowNumber",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "14_TG_SendDeleteError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02_Parse_Command": {
+      "main": [
+        [
+          {
+            "node": "03_Switch_Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "02_Parse_Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 Cargar filas": {
+      "main": [
+        [
+          {
+            "node": "10 Converetir a número",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Converetir a número": {
+      "main": [
+        [
+          {
+            "node": "11_IF_RowFound",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a171e84f-2fea-4fb4-86c0-b27d7a6a86e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "TK7QVQj2umAx4eBG",
+  "tags": []
+}
