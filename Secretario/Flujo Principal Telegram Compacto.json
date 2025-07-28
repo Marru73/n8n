@@ -1,0 +1,2674 @@
+{
+  "name": "Flujo Principal Telegram Compacto",
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=\n{{ $json.output }}\n",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        -704
+      ],
+      "id": "ee251928-ee33-4ddc-9150-3e56e65d53fe",
+      "name": "Send a text message",
+      "webhookId": "4872f941-1a3a-45f2-aecb-b01123e8b402",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "cfa0e685-3fca-4879-948f-a7c48cfd9121"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c431cf58-92bf-47c7-b55d-15731eebebf3",
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ed908613-0daa-4197-9079-785952a16d50",
+                    "leftValue": "={{ $json.message.photo }}",
+                    "rightValue": "exists",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Imagen"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2160,
+        -640
+      ],
+      "id": "c51f4e6d-7f66-4a12-ba84-b5cebbc0bd4b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cae8758f-f700-4a3b-9959-33ebef970da3",
+              "name": "instruccion",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1696,
+        -800
+      ],
+      "id": "51cad94c-95eb-4f75-a89e-b90266e58933",
+      "name": "texto"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1920,
+        -640
+      ],
+      "id": "738efa50-fde6-4767-8484-b439bc7bc816",
+      "name": "Descargar Audio",
+      "webhookId": "e480f8e6-dc97-490b-a571-580bd0c9ef5d",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-1"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "language",
+              "value": "es"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1696,
+        -640
+      ],
+      "id": "99789a50-87ec-42e3-8c51-739ad9f9be5d",
+      "name": "Transcribe audio telegram",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd382eab-82f8-467e-91da-573f16d7409a",
+              "name": "instruccion",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1472,
+        -640
+      ],
+      "id": "c8c21e31-7678-4772-be8f-4fa5018e4ec1",
+      "name": "Audio"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2352,
+        -624
+      ],
+      "id": "622fde39-f293-4a81-98f9-f3b299378231",
+      "name": "Telegram Trigger",
+      "webhookId": "15004a41-775e-4bf1-be4f-ac4208f8a793",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        -96
+      ],
+      "id": "52db6cdf-395a-40ac-91ad-e2a355d91f3a",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -464
+      ],
+      "id": "60b53e7e-1a33-4077-9b6e-066c7de2cb3c",
+      "name": "Google Search",
+      "credentials": {
+        "serpApi": {
+          "id": "A0ywXwbIgMmbhZfa",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        -384
+      ],
+      "id": "6eb12fd2-584d-4771-9e6f-3552c1b269f7",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool when asked questions from our own knowledge base",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "includeDocumentMetadata": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        -480
+      ],
+      "id": "0f376b39-6c6e-4ec5-9867-642bf2bcf94f",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Xr0QwNe7JcxCTrzc",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=telegram_{{ $('Telegram Trigger').item.json.message.chat.id }}\n",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -832,
+        -176
+      ],
+      "id": "8a939958-8b94-4e3f-a98b-3235a67ad0ce",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "AMNUW9j1MQM28TqJ",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -160
+      ],
+      "id": "b19ff2d5-a595-4c86-b87b-a90eadf22e67",
+      "name": "Pensamiento"
+    },
+    {
+      "parameters": {
+        "content": "### CALCULADORA\n",
+        "height": 180,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1200,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "3718514a-26b8-4544-b547-28c819e315d5",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### BUSCAR GOOGLE\n",
+        "height": 180,
+        "width": 190,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        -528
+      ],
+      "typeVersion": 1,
+      "id": "7c870160-536f-4aaa-8e37-594df0996469",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## BBDD VECTORIAL",
+        "height": 280,
+        "width": 342,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "02256bc5-6e9d-4276-bad3-8f3aa18ebb68",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE AI PRINCIPAL",
+        "height": 200,
+        "width": 340,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        -768
+      ],
+      "typeVersion": 1,
+      "id": "878b1abd-93e3-49f0-93ea-a4fa642e3ece",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## MODELOS IA\n\n",
+        "height": 200,
+        "width": 342,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "d7fcc7ba-090a-424e-a29d-437ccc38e308",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "### THINK\n",
+        "height": 184,
+        "width": 150,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -656,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "5c4ab219-7bba-400d-bc24-2db089425e6d",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "### MEMORIA\n",
+        "height": 180,
+        "width": 150,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "8c0e9c12-7fc1-4224-8e71-8c03366bf2f8",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        -464
+      ],
+      "id": "36975f4e-f2a0-45e0-8c0e-926bcb9ecdca",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1472,
+        -464
+      ],
+      "id": "63af1cd8-0709-444c-9801-798a51f19662",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "Analiza la imagen y dime qué ves.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1296,
+        -464
+      ],
+      "id": "fd6328fb-6dc0-4186-bdad-f5c6c012d10a",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# TELEGRAM",
+        "height": 752,
+        "width": 1480,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2416,
+        -928
+      ],
+      "typeVersion": 1,
+      "id": "6972143a-8880-4e98-8db4-3e11678bb9d0",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## TELEGRAM\n\n\n\n\n\n\n\n\n\n\n                                                        \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 420,
+        "width": 940,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "7a8ce27a-5c28-4266-83ef-5c47eb6fc31a",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -480
+      ],
+      "id": "2ed1c8fc-518e-4d90-b520-7075f5a839f7",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "XK4Md2R87321Asnf",
+          "name": "Credencial de Travily"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### BUSCAR TAVILY\n",
+        "height": 180,
+        "width": 190,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -384,
+        -528
+      ],
+      "typeVersion": 1,
+      "id": "5cc95b48-a5e9-4a3a-8c5a-dbd356ea636d",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "86bffb28-9626-42fb-8090-7e36524d605b",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        -832
+      ],
+      "id": "fe7c66b6-24af-45b6-a797-1737c70e6a7a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "model": "tts-1-hd",
+        "input": "={{ $('Agente Principal').item.json.output }}",
+        "voice": "nova",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -144,
+        -928
+      ],
+      "id": "18df9a90-b7f4-44ef-b160-917fea3e264f",
+      "name": "Generate audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and change the MIME type of binary data\nfor (const item of $input.all()) {\n  // Check if the item has binary data\n  if (item.binary) {\n    // Find the binary property name (assuming there's at least one)\n    const binaryPropertyNames = Object.keys(item.binary);\n\n    for (const propName of binaryPropertyNames) {\n      // If the MIME type is 'audio/mp3', change it to 'audio/mpeg'\n      if (item.binary[propName].mimeType === \"audio/mp3\") {\n        item.binary[propName].mimeType = \"audio/mpeg\";\n      }\n    }\n  }\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -928
+      ],
+      "id": "dabb3fd2-95b1-43d8-9623-e0ebd6e3d42a",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        -928
+      ],
+      "id": "02a8e339-9095-4c6c-a921-26087d709f99",
+      "name": "Send an audio file",
+      "webhookId": "5e0e4ce1-5689-4866-88c6-49fe32688e24",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f084a6a3-c1df-4376-bcc9-99259dc9b8a2",
+              "name": "instruccion",
+              "value": "=##The user provided the following image and text\n\n##User Image Description: {{ $json.content }}\n\n#User Message:{{ $('Telegram Trigger').item.json.messages[0].image.caption || \"Describe the image in detail\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1120,
+        -464
+      ],
+      "id": "9acaaee9-7e4e-4068-b5b9-d4ace73c9582",
+      "name": "Imagen"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Crear un evento en Google Calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "marru973@gmail.com",
+          "mode": "list",
+          "cachedResultName": "marru973@gmail.com"
+        },
+        "start": "={{ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -2192,
+        128
+      ],
+      "id": "50f7bfb3-d90d-45c0-8d42-34f7ec31560c",
+      "name": "Crear evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "RsCrayqPaAtlsTvY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Editar Evento en Google Calendar",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "marru973@gmail.com",
+          "mode": "list",
+          "cachedResultName": "marru973@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -2352,
+        304
+      ],
+      "id": "3c8a732b-d57d-4bbf-af6e-187db5f96142",
+      "name": "Editar Evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "RsCrayqPaAtlsTvY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Eliminar Evento de Google Calendar",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "marru973@gmail.com",
+          "mode": "list",
+          "cachedResultName": "marru973@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -2352,
+        128
+      ],
+      "id": "f1889a79-3c37-42d7-a482-d453d8994ee7",
+      "name": "Eliminar evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "RsCrayqPaAtlsTvY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Obtener eventos de Google Calendar",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "marru973@gmail.com",
+          "mode": "list",
+          "cachedResultName": "marru973@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', `dia previo a la fecha solicitada`, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', `dia siguiente a la fecha solicitada`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -2192,
+        304
+      ],
+      "id": "1265cd25-7281-4b66-8d54-d0686233ac6a",
+      "name": "Obtener Eventos",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "RsCrayqPaAtlsTvY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.instruccion }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=# Contexto\n\nEres el asistente personal definitivo. Tu trabajo es enviar la consulta del usuario a la herramienta correcta. Nunca debes redactar correos electrónicos ni crear resúmenes; solo necesitas llamar a la herramienta correcta.\n\nCuando te hagan preguntas del tipo \"¿De qué equipo eres?\" \"¿Cuál es tu equipo\", quiero que respondas: \"Soy bética hasta las trancas y antimadridista igual que mi jefe. ¡¡¡ MUSHO BETI !!!\"\n\n\n# Herramientas\n\npensamiento: Usa esto \"SIEMPRE\" Resume mentalmente el problema y planifica la respuesta. \n\n-Agente de correos: Usa esta herramienta para realizar acciones en el correo electrónico.\n\n-Agente de calendarios: Usa esta herramienta para realizar acciones en el calendario.\n\n- Agente de contactos: Usa esta herramienta para obtener, actualizar o añadir contactos.\n\n- Agente documentos: Usa esta herramienta para realizar acciones con docummentos.\n\n- Agente contable: Usa esta herramienta para el control de ingresos y gastos.\n\n- Agente de tareas: Usa esta herramienta para el control de tareas.\n\n- Escritor: Usa siempre esta herramienta para escribir de manera profesional.\n\n- Utiliza Google Seahch y/o Tavily para buscar por internet.\n\n# Reglas\n\nAlgunas acciones requieren que primero busques información de contacto. Para las siguientes acciones, debes obtener la dirección de correo electrónico y enviársela al agente que la necesite:\n\nEnviar correos electrónicos\n\nRedactar correos electrónicos\n\nCrear un evento de calendario con un asistente\n\n# Tarea\n\nLlamar a las herramientas necesarias según la solicitud del usuario.\n\nLlamar la herramienta \"pensamiento\" para verificar que tomaste los pasos correctos. Esta herramienta debe ser llamada cada vez.\n\n\n# Ejemplos\n\n## Input\n\nEnvía un correo electrónico a Pau Berenguer preguntándole cómo le va el día.\n\n## Acciones\n\n1. Llamar a la herramienta de “Agente de contactos” para obtener el contacto\n2. Llamar a la herramienta de  “agente de correos” para enviar el correo electrónico.\n3. Llamar a la herramienta “pensamiento” para comprobar que todas las tareas han sido completadas.\n\n## Output\n\nAcabo de enviar el correo que me has pedido a Pau ¿Hay algo más en lo que pueda ayudarte?\n\n# Notas\n\nFecha y hora actuales: `{{ $now }}`"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -832,
+        -704
+      ],
+      "id": "01eaa347-33be-4dbc-b499-269c63935e31",
+      "name": "Agente Principal"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Usa esta herramienta para gestionar el calendario.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=**Eres un asistente inteligente de calendario.**\nTienes acceso a herramientas que te permiten **crear**, **consultar**, **modificar** y **eliminar** eventos de forma precisa.\nLa fecha y hora actual es: `{{ $now.setZone('Europe/Madrid') }}`.\n\n---\n\n### 🔧 Funciones disponibles:\n\n**🗓 Crear Evento**\nCuando el usuario solicite crear un evento:\n\n* Si se indica una hora de inicio pero no una hora de fin, asume una duración de 60 minutos.\n* Si no se proporciona una fecha, asume que es hoy.\n* Si faltan el título o la descripción, solicítalos antes de continuar. \n\n**📋 Obtener Eventos**\nConsulta todos los eventos programados para un día específico:\n\n* Devuelve la lista ordenada cronológicamente.\n* Resume cada evento en una línea con título, hora y duración.\n\n**✏️ Modificar Evento**\nPermite cambiar la fecha, hora, título o descripción de un evento existente:\n\n* Si el usuario no indica qué parte desea modificar, solicita la información necesaria.\n\n**🗑 Eliminar Evento**\nElimina un evento específico según el título o la hora de inicio.\n\n* Si hay ambigüedad, solicita confirmación para evitar eliminar el evento incorrecto.\n\n** ---\n\n# IDIOMA\nSi la herramienta te devuelve información en otro idioma, **tradúcela siempre al español** antes de responder.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -2368,
+        -32
+      ],
+      "id": "c9fb5f59-3adc-4372-8a1a-37b6213ba535",
+      "name": "Agente de calendarios"
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ $fromAI(\"messageID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1968,
+        144
+      ],
+      "id": "b67e7e6a-e70b-4988-ba26-106393809f7b",
+      "name": "marcar como no leido",
+      "webhookId": "7445ae21-cc21-4cf5-96c5-10216ea03308",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1824,
+        144
+      ],
+      "id": "b68c587f-badc-4511-8b1d-609251790489",
+      "name": "enviar email",
+      "webhookId": "d2f5d831-d8c7-4a21-9ecf-092be592af59",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1680,
+        144
+      ],
+      "id": "f5fbc07c-b567-4e36-aa99-ca6843ee0c46",
+      "name": "responder email",
+      "webhookId": "91731aa9-585c-4e7b-9305-88287af8a94d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+        "labelIds": "={{ $fromAI(\"labelID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1536,
+        144
+      ],
+      "id": "7874f01d-ef2b-4dbe-aaad-c4a120b52067",
+      "name": "etiquetar email",
+      "webhookId": "c8f7e15b-5cde-4552-9ae9-2456010f0863",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1968,
+        320
+      ],
+      "id": "13c5ea0e-2abb-4996-9a75-b1e82071261d",
+      "name": "obtener etiquetas",
+      "webhookId": "e3637850-1eeb-46cd-b361-e15efb9bd46f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "html",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "threadId": "={{ $fromAI(\"threadID\") }}",
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1680,
+        320
+      ],
+      "id": "653a4e46-abcf-4211-a039-01e0e3bb6c4d",
+      "name": "crear borrador",
+      "webhookId": "70083254-7dec-466d-864c-33fb6efdb75f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1536,
+        320
+      ],
+      "id": "5dd3bafb-a338-4432-8e96-055001294171",
+      "name": "Borrar email",
+      "webhookId": "01df8350-95ce-4e83-83e7-0124f60059d4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE DE EMAIL",
+        "height": 548,
+        "width": 592,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2000,
+        -96
+      ],
+      "id": "5c964410-23b6-46d9-93d5-c7ae6c21d849",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Herramienta para gesionar correos electrónicos.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# Rol\n\nEres un asistente de gestión de Correo Electrónico. \n\n# Especificaciones\n\nTodos los correos electrónicos deben tener un formato profesional en HTML y estar firmados como \"Fj Junquero\".\n\n# Herramientas\n\n- Usa \"enviar email\" para enviar correos electrónicos. Si no se indica ninguna dirección de correo, mándala siempre a: marru973@gmail.com\n- Usa \"crear borrador\" si el usuario pide un borrador.\n- Usa \"marcar como no leido\" para marcar un correo electrónico como no leído. Primero debes usar \"Get Emails\" para tener el ID del mensaje del correo electrónico que deseas marcar.\n- Usa \"etiquetar email\" para etiquetar un correo electrónico. Primero debes usar \"obtener etiqueta\" para tener el ID del mensaje del correo electrónico que deseas etiquetar. Luego debes usar \"Get Labels\" para tener el ID de la etiqueta.\n- Usa \"responder email\" para responder a un correo electrónico. Primero debes usar \"obtener email\" para tener el ID del mensaje del correo electrónico al que deseas responder.\n- Usa \"Borrar email\" para borrar los emails. Primero debes usar \"obtener email\" para  tener el ID del mensaje del correo electrónico que deseas borrar.\n\n# Notas\n\nFecha y hora actuales: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -1856,
+        -32
+      ],
+      "id": "2140daf9-f102-4f37-b6ed-a9af94bc8d61",
+      "name": "Agente de correos"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE DE CALENDARIOS",
+        "height": 548,
+        "width": 368,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2416,
+        -96
+      ],
+      "id": "abefd138-6fe5-4b50-8986-bfdc6a148c6a",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "filters": {
+          "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}",
+          "sender": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sender', `who the emails are from`, 'string') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1824,
+        320
+      ],
+      "id": "60b0f6d2-8ca2-4003-a45a-f404549f906d",
+      "name": "obtener email",
+      "webhookId": "9c72d655-acac-4e6e-8132-b9c7a15d0abf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WxWqlWrLwLQJwlIt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Herramienta para escribir como un escritor.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# ROLE\nEres un escritor profesional de contenido, especializado en crear textos efectivos, claros y útiles.\n\nPuedes redactar:\n- Artículos SEO\n- Guiones\n- Historias\n- Resúmenes\n- Posts para redes\n\n# INSTRUCCIONES\n- Adapta el tono al contexto si se indica.\n- Sigue las instrucciones del usuario fielmente.\n- No incluyas disclaimers ni comentarios fuera del texto solicitado.\n\n# IDIOMA\nResponde **siempre en español**, incluso si el usuario proporciona instrucciones en otro idioma.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -144
+      ],
+      "id": "7c3d4ba9-3d64-4327-9239-ba988950ef67",
+      "name": "Escritor"
+    },
+    {
+      "parameters": {
+        "content": "### ESCRITOR",
+        "height": 212,
+        "width": 310,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "cc22cfff-50d4-441d-908c-9ea067ea8514",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        256
+      ],
+      "id": "06fe64de-a79d-4a40-8ae4-dae17cf5ffa4",
+      "name": "Actualizar documento",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "o7Y2ZpTaoRyZ9FPd",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        256
+      ],
+      "id": "5d7a8d6b-bfa4-43d4-99b4-27589c55e444",
+      "name": "Obtener documento",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "o7Y2ZpTaoRyZ9FPd",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a document in Google Docs",
+        "driveId": "=myDrive",
+        "folderId": "1RW6kzvqdd3euj1KwuCkt-dbbQnSVpKs7",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -1312,
+        256
+      ],
+      "id": "9bf153a8-fb87-462c-92fc-b1cf032be90c",
+      "name": "Crear Documento",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "o7Y2ZpTaoRyZ9FPd",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Herramienta para el uso de documentos.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=Eres un agente experto en el manejo de documentos y tu función aquí es muy sencilla: \nresponder a las peticiones del usuario utilizando las herramientas a tu alcance.\n\nPuedes:\n- Crear un documento\n- Guardar un documento\n- Actualizar documentos\n- Obtener documentos\n\n⚠️ No redactes el contenido tú mismo: solo realiza acciones sobre documentos.\n\nAntes de ejecutar una acción, asegúrate de tener:\n- Título del documento (si vas a crearlo)\n- URL o ID (si vas a obtener o actualizar)\n\nSi falta algún dato, solicita confirmación antes de continuar.\n\n📌 Todas las respuestas deben estar en **español**, incluso si algún contenido viene en otro idioma."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -1248,
+        112
+      ],
+      "id": "ceb75cde-9c7f-4b88-8117-a4d583910161",
+      "name": "Agente documentos"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE DE DOCUMENTOS",
+        "height": 388,
+        "width": 476
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1360,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "682d10a1-9f16-413c-8e1b-eba1998020c2",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[0].file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1920,
+        -464
+      ],
+      "id": "608d9b8b-de07-449a-9831-f91710ac510d",
+      "name": "Descargar Imagen",
+      "webhookId": "a24cb3fe-0ea6-416a-9a4f-456e6d836b08",
+      "credentials": {
+        "telegramApi": {
+          "id": "qq8bB6iKJvsUX3Iv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Herramienta para gestionar tareas.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -528,
+        112
+      ],
+      "id": "04d8f049-e4ef-4b59-84d7-bb2f2ca8a25c",
+      "name": "Agente de tareas"
+    },
+    {
+      "parameters": {
+        "task": "MTEyOTQzMTAzODQwNDM4MTk2NjQ6MDow",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        256
+      ],
+      "id": "573ee4b3-e585-4177-82ec-ebe67ab4cbf2",
+      "name": "Crear tarea",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "I4IxfZk7l5yo21ml",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "MTEyOTQzMTAzODQwNDM4MTk2NjQ6MDow",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        256
+      ],
+      "id": "f2ce22a3-7326-4323-999c-393c65e60b1a",
+      "name": "Cargar tareas",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "I4IxfZk7l5yo21ml",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "task": "MTEyOTQzMTAzODQwNDM4MTk2NjQ6MDow",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        256
+      ],
+      "id": "73036439-71ff-4809-a3f3-6f2ee8b9b08d",
+      "name": "Cargar tarea",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "I4IxfZk7l5yo21ml",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update a task in Google Tasks",
+        "operation": "update",
+        "task": "MTEyOTQzMTAzODQwNDM4MTk2NjQ6MDow",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}",
+        "updateFields": {
+          "status": "completed"
+        }
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        256
+      ],
+      "id": "73f66108-2901-46b1-a951-5fde4e2b66c3",
+      "name": "Marcar tareas finalizadas",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "I4IxfZk7l5yo21ml",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update a task in Google Tasks",
+        "operation": "update",
+        "task": "MTEyOTQzMTAzODQwNDM4MTk2NjQ6MDow",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}",
+        "updateFields": {
+          "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        256
+      ],
+      "id": "3830d3d8-2320-4359-b01f-2b9a2a9d694f",
+      "name": "Modificar nombre tarea.",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "I4IxfZk7l5yo21ml",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Elimina tareas.",
+        "operation": "delete",
+        "task": "MTEyOTQzMTAzODQwNDM4MTk2NjQ6MDow",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        256
+      ],
+      "id": "735776ae-aa08-4853-9ec6-9ac9e464be1a",
+      "name": "Eliminar tareas",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "I4IxfZk7l5yo21ml",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE DE TAREAS",
+        "height": 384,
+        "width": 832,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -832,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "23fdf4b7-f3b7-4c7a-afff-1162f58dbadb",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Herramienta para gestionar Contactos",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=Eres un asistente especializado en la gestión de contactos.\n\nPuedes:\n- Buscar contactos\n- Crear contactos nuevos\n- Actualizar información de un contacto existente\n\n⚠️ No inventes información.\nValida que tengas al menos:\n- Nombre o apellido\n- Correo electrónico (si vas a crear o actualizar)\n\nSi algo falta, solicita al usuario la información necesaria.\n\n📌 Toda la comunicación debe ser en **español**.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        112
+      ],
+      "id": "a9e92c8e-24e4-4623-9f16-ced22baab982",
+      "name": "Agente de contactos"
+    },
+    {
+      "parameters": {
+        "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+        "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+        "additionalFields": {
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "home",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        176,
+        256
+      ],
+      "id": "3d26bf48-27e9-4258-bfa6-41d2612c0be4",
+      "name": "Create",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "contactId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Contact_ID', ``, 'string') }}",
+        "fields": [
+          "emailAddresses",
+          "names"
+        ],
+        "updateFields": {
+          "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+          "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "home",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        256
+      ],
+      "id": "4338c998-4390-44dc-941b-62d31e17ca17",
+      "name": "Update",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE DE CONTACTOS",
+        "height": 388,
+        "width": 476
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "dca0b9ab-096b-4e76-a3dc-e348ac84f0c7",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "contactId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Contact_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        304,
+        256
+      ],
+      "id": "752fd330-6116-41a6-9064-48d4ed19a526",
+      "name": "Borrar contacto",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 500,
+        "fields": [
+          "names",
+          "emailAddresses",
+          "phoneNumbers"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        64,
+        256
+      ],
+      "id": "c7c10429-741a-494c-8956-71fdef8df7ca",
+      "name": "Cargar contactos",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "aFajUqqsVPVSYRtF",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/UOIqAnmS11Reiei1Ytkc",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_ff904b197980a8bc506e5dd015e03588aa5d16c78141b1ed"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "Hola"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        -720
+      ],
+      "id": "7f4532df-3fce-49f9-ac1b-a6b0df7f7d63",
+      "name": "Elevenlabs audio"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U",
+          "mode": "list",
+          "cachedResultName": "Hoja de ingresos y gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1729548884,
+          "mode": "list",
+          "cachedResultName": "Gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit#gid=1729548884"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Descripción": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripci_n', ``, 'string') }}",
+            "Valor": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Valor', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -240,
+        -128
+      ],
+      "id": "5f82f77e-be9f-438d-aec4-20476420b307",
+      "name": "Gastos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U",
+          "mode": "list",
+          "cachedResultName": "Hoja de ingresos y gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Ingresos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Descripción": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripci_n', ``, 'string') }}",
+            "Valor": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Valor', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -352,
+        -128
+      ],
+      "id": "867351d5-5599-47d9-8450-54aa4f583c57",
+      "name": "Ingresos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Agente contable",
+        "height": 336,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "0298a2cd-b91e-464a-96c7-9a7e769adb31",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Herramienta para llevar el control de Ingresos y gastos.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=Debes formatear los datos que te paso y generar un JSON con las siguientes variables:\n{\n  \"Concepto\":\"ingreso o gasto\",\n  \"Descripción\":\"some_value\",\n  \"Valor\":\"some_value\",\n  \"Fecha\":\"{{ $now.format('dd-MM-yyyy') }}\"\n}\n\n* cuando te diga que cambies o modifiques algo en una fila de gastos o ingresos, cambia solo lo que se te pida, no crees una nueva fila.\n\n* Siempre que te diga \"He comprado\", \"Me he gastado\" tómalo como gasto.\n\nEjemplos:\n\n\"Me he comprado una camiseta de 200€\"\n\"Me he gastado 200€ en una camiseta\"\n\nEjemplo prácticos:\n\nUsuario: \"Me he comprado una camiseta de 200€\"\nDescripción: Camiseta\nValor: 200\nFecha: {{ $now.format('dd-MM-yyyy') }}\n\n\n* Siempre que te diga \"vendido\", \"He ganado\", \"He ingresado\" tómalo como ingreso.\n\nEjemplos:\n\n\"He vendido una chaqueta por 200€\"\n\"He ingresado 200€ por una automatización.\n\nEjemplo práctico\n\nUsuario: \"He vendido el coche por 11000€\"\nDescripción: Venta del coche\nValor: 11000\nFecha: {{ $now.format('dd-MM-yyyy') }}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        -256
+      ],
+      "id": "3d9ec3fa-55d2-4ce1-9f65-f7246523d029",
+      "name": "Agente contable"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U",
+          "mode": "list",
+          "cachedResultName": "Hoja de ingresos y gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Ingresos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -128,
+        -128
+      ],
+      "id": "3ba25574-c12d-469e-a0c6-96132b1222f5",
+      "name": "Leer filas ingresos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U",
+          "mode": "list",
+          "cachedResultName": "Hoja de ingresos y gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1729548884,
+          "mode": "list",
+          "cachedResultName": "Gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TL8XOUSAW6N5O_IFxv_339HXIOvI-bApXQonKOXOg_U/edit#gid=1729548884"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -16,
+        -128
+      ],
+      "id": "3e51f46e-6819-4898-91d9-1bc8fc40d37f",
+      "name": "Leer filas gastos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nJQ0S62WV1ArpZpu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -832,
+        -416
+      ],
+      "id": "427362cd-3910-48d3-89af-6537ea76e63f",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvl2z4itoSnCMOsZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        -416
+      ],
+      "id": "1f83422c-3f97-4592-a530-a31c8a5195be",
+      "name": "Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rFu2LKjylkb5gE17",
+          "name": "Gemini API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Descargar Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Descargar Imagen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "texto": {
+      "main": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio telegram": {
+      "main": [
+        [
+          {
+            "node": "Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio": {
+      "main": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pensamiento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Imagen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Generate audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate audio": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Imagen": {
+      "main": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de calendarios",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editar Evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de calendarios",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eliminar evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de calendarios",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Eventos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de calendarios",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Principal": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de calendarios": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marcar como no leido": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enviar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "responder email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "etiquetar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener etiquetas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear borrador": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Borrar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de correos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de correos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escritor": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente documentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente documentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente documentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente documentos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Imagen": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de tareas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear tarea": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de tareas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar tareas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de tareas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar tarea": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de tareas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar tareas finalizadas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de tareas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificar nombre tarea.": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de tareas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eliminar tareas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de tareas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de contactos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Borrar contacto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar contactos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de contactos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gastos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente contable",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ingresos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente contable",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente contable": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer filas ingresos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente contable",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer filas gastos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente contable",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente de calendarios",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente de correos",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Escritor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente documentos",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente de tareas",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente de contactos",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente contable",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b5980c33-7fb7-47ed-82db-d4fbccbf6eaf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "523f79adcb4c23572c34b45d3bba70c9be7ccc1e8000c837032bc7ae3a060106"
+  },
+  "id": "mMv99Rh15FO2YZvC",
+  "tags": [
+    {
+      "createdAt": "2025-07-13T18:02:49.662Z",
+      "updatedAt": "2025-07-13T18:02:49.662Z",
+      "id": "9pjpmjCjld0jhKg3",
+      "name": "Fran Junquero"
+    },
+    {
+      "createdAt": "2025-07-14T09:29:54.016Z",
+      "updatedAt": "2025-07-14T09:29:54.016Z",
+      "id": "hfGesm7WglBONLwl",
+      "name": "😎"
+    }
+  ]
+}
