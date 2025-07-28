@@ -35,6 +35,8 @@ Este repositorio centraliza mis flujos de trabajo de n8n.
 
     ## Workflows:
 
+    **Nota IMPORTANTE:** En esta carpeta tienes el "Flujo Principal Telegram" básico con sus Subworkflows y también tienes "Flujo Principal Telegram Compacto" que está actualizado con nodos Agent IA Tool, para prescindir de subworkflows, aunque aún contienen un par de ellos.
+
 - **Flujo Principal Telegram**  
   Orquestador principal que recibe mensajes de Telegram, detecta texto/voz/foto y llama al agente adecuado (Gmail, Calendario, Contactos, Documentos, Contabilidad, Writer, Calculadora o Búsqueda web). 
 - 
